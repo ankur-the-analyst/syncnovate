@@ -1,0 +1,928 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Syncnovate - Shape Your Future</title>
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Ctext x='50%' y='50%' font-family='Arial, sans-serif' font-size='18' fill='%230ea5e9' text-anchor='middle' dominant-baseline='middle'%3ES%3C/text%3E%3C/svg%3E" type="image/svg+xml">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" xintegrity="sha512-SnH5WK+bZxgPHs44uWIX+LLJAJ9/2PkPKZ5QiAj6Ta86w+fsb2TkcmfRyVX3pBnMFcV7oQPJkl9QevSCWr3W6A==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'primary-navy': '#0f172a', /* Dark Blue for main text, backgrounds */
+                        'accent-sky': '#0ea5e9', /* Sky Blue for CTAs, highlights */
+                        'accent-amber': '#facc15', /* Amber for secondary CTAs, highlights */
+                        'light-gray': '#f1f5f9', /* Light Gray for section backgrounds */
+                        'white': '#ffffff', /* Pure White */
+                        'gray-text': '#4b5563', /* Darker gray for body text */
+                    },
+                    fontFamily: {
+                        poppins: ['Poppins', 'sans-serif'],
+                    },
+                    keyframes: {
+                        fadeInUp: {
+                            '0%': { opacity: 0, transform: 'translateY(20px)' },
+                            '100%': { opacity: 1, transform: 'translateY(0)' },
+                        },
+                        float: {
+                            '0%, 100%': { transform: 'translateY(0px)' },
+                            '50%': { transform: 'translateY(-15px)' },
+                        },
+                        gradientShift: {
+                            '0%': { backgroundPosition: '0% 50%' },
+                            '50%': { backgroundPosition: '100% 50%' },
+                            '100%': { backgroundPosition: '0% 50%' },
+                        }
+                    },
+                    animation: {
+                        'fade-in-up': 'fadeInUp 0.8s ease-out forwards',
+                        'float': 'float 6s ease-in-out infinite',
+                        'gradient-shift': 'gradientShift 15s ease infinite',
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        /* Universal box-sizing for consistent layout */
+        *, *::before, *::after {
+            box-sizing: border-box;
+        }
+
+        /* Apply Poppins font to the entire body */
+        body {
+            font-family: 'Poppins', sans-serif;
+            color: #0f172a; /* Primary Navy */
+            overflow-x: hidden; /* Prevent horizontal scroll due to animations */
+        }
+
+        /* Custom scrollbar for better aesthetics */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f5f9; /* Light Gray */
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #0ea5e9; /* Accent Sky */
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #0c8ccc; /* Darker sky blue on hover */
+        }
+
+        /* Common animation classes for IntersectionObserver */
+        /* Elements will start invisible and slide up */
+        .reveal-item {
+            opacity: 0;
+            transform: translateY(50px);
+            transition: opacity 0.8s ease-out, transform 0.8s ease-out;
+        }
+        .reveal-item.is-visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* Elements will start invisible and slide from left */
+        .reveal-left {
+            opacity: 0;
+            transform: translateX(-100px);
+            transition: opacity 0.8s ease-out, transform 0.8s ease-out;
+        }
+        .reveal-left.is-visible {
+            opacity: 1;
+            transform: translateX(0);
+        }
+
+        /* Elements will start invisible and slide from right */
+        .reveal-right {
+            opacity: 0;
+            transform: translateX(100px);
+            transition: opacity 0.8s ease-out, transform 0.8s ease-out;
+        }
+        .reveal-right.is-visible {
+            opacity: 1;
+            transform: translateX(0);
+        }
+
+        /* Elements will start invisible and zoom in */
+        .zoom-in {
+            opacity: 0;
+            transform: scale(0.8);
+            transition: opacity 0.8s ease-out, transform 0.8s ease-out;
+        }
+        .zoom-in.is-visible {
+            opacity: 1;
+            transform: scale(1);
+        }
+
+        /* Accordion specific styles for smooth height transition */
+        .accordion-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.4s ease-out; /* Slower transition for smoother effect */
+        }
+
+        /* Class to explicitly hide content when not active, without affecting transition */
+        .accordion-content.hidden-display {
+            display: none;
+        }
+
+        /* Simplified Accordion Header styles */
+        .accordion-header {
+            padding: 1.5rem; /* Maintain padding for click target */
+            /* Removed border-bottom for separator line */
+        }
+
+        /* Active state for accordion header */
+        .accordion-header.active span {
+            color: #0ea5e9; /* accent-sky */
+            font-weight: 600; /* make text bold */
+        }
+
+        /* Hide minus icon by default, show plus */
+        .accordion-header .fa-minus {
+            display: none;
+        }
+        /* Show minus icon when active, hide plus */
+        .accordion-header.active .fa-minus {
+            display: inline-block;
+            color: #0ea5e9; /* Change icon color to match active text */
+        }
+        .accordion-header.active .fa-plus {
+            display: none;
+        }
+
+
+        /* For the student path planner, hide arrows on mobile and stack items */
+        @media (max-width: 767px) { /* Tailwind's 'md' breakpoint is 768px */
+            .path-arrow {
+                display: none; /* Hide arrows on mobile */
+            }
+            .path-box {
+                width: 100%; /* Full width on mobile */
+            }
+        }
+
+        /* Floating icons for Hero section - specific positioning and animation */
+        .floating-icon {
+    max-width: 64px;
+    max-height: 64px;
+    width: 12vw;
+    height: 12vw;
+    min-width: 40px;
+    min-height: 40px;
+    z-index: 0;
+
+            position: absolute;
+            animation: float 6s ease-in-out infinite, fadeIn 1s ease-out forwards;
+            opacity: 0; /* Start hidden */
+        }
+
+        /* Stagger animation delays for floating icons */
+        .icon-1 { top: 10%; left: 10%; animation-delay: 0s, 0.2s; }
+        .icon-2 { top: 20%; right: 15%; animation-delay: 1s, 0.4s; }
+        .icon-3 { bottom: 20%; left: 5%; animation-delay: 2s, 0.6s; }
+        .icon-4 { bottom: 10%; right: 10%; animation-delay: 3s, 0.8s; }
+        .icon-5 { top: 5%; left: 40%; animation-delay: 4s, 1.0s; }
+        .icon-6 { bottom: 5%; right: 40%; animation-delay: 5s, 1.2s; }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 0.7; } /* Fade in to 70% opacity */
+        }
+
+        /* Custom styles for hollow text with specific stroke colors */
+        .text-hollow-black-stroke {
+            -webkit-text-stroke: 1px #0f172a; /* Black stroke */
+            text-stroke: 1px #0f172a;
+            color: transparent; /* Make the fill transparent */
+        }
+
+        /* New: Custom style for hollow text with amber (yellow) stroke */
+        .text-hollow-amber-stroke {
+            -webkit-text-stroke: 1px #facc15; /* Amber stroke */
+            text-stroke: 1px #facc15;
+            color: transparent; /* Make the fill transparent */
+        }
+
+        /* Specific fix for mobile menu to ensure it stays within bounds */
+        #mobile-menu {
+            overflow-x: hidden; /* Ensure no horizontal overflow within the menu itself */
+            max-width: 100vw; /* Explicitly limit max width to viewport width */
+        }
+    </style>
+</head>
+<body class="bg-light-gray">
+    <nav class="bg-white shadow-lg p-4 fixed w-full z-50 transition-all duration-300 transform -translate-y-full md:translate-y-0" id="navbar">
+        <div class="container mx-auto flex justify-between items-center">
+            <a href="#" class="text-2xl font-bold text-primary-navy">
+                <span class="text-primary-navy">Sync</span><span class="text-accent-sky">novate</span>
+            </a>
+            <div class="hidden md:flex space-x-6">
+                <a href="#hero" class="text-primary-navy hover:text-accent-sky transition duration-300">Home</a>
+                <a href="#about" class="text-primary-navy hover:text-accent-sky transition duration-300">About Us</a>
+                <a href="#courses" class="text-primary-navy hover:text-accent-sky transition duration-300">Courses</a>
+                <a href="#why-syncnovate" class="text-primary-navy hover:text-accent-sky transition duration-300">Why Us?</a>
+                <a href="#testimonials" class="text-primary-navy hover:text-accent-sky transition duration-300">Testimonials</a>
+                <a href="#faq" class="text-primary-navy hover:text-accent-sky transition duration-300">FAQ</a>
+                <a href="#contact" class="text-primary-navy hover:text-accent-sky transition duration-300">Contact</a>
+            </div>
+            <button class="md:hidden text-primary-navy focus:outline-none" id="mobile-menu-button" aria-label="Toggle mobile menu">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+                </svg>
+            </button>
+        </div>
+        <div class="md:hidden absolute top-full left-0 w-full bg-white shadow-lg p-4 space-y-4 transition-all duration-300 ease-in-out transform scale-y-0 origin-top" id="mobile-menu">
+            <a href="#hero" class="block text-primary-navy hover:text-accent-sky transition duration-300">Home</a>
+            <a href="#about" class="block text-primary-navy hover:text-accent-sky transition duration-300">About Us</a>
+            <a href="#courses" class="block text-primary-navy hover:text-accent-sky transition duration-300">Courses</a>
+            <a href="#why-syncnovate" class="block text-primary-navy hover:text-accent-sky transition duration-300">Why Us?</a>
+            <a href="#testimonials" class="block text-primary-navy hover:text-accent-sky transition duration-300">Testimonials</a>
+            <a href="#faq" class="block text-primary-navy hover:text-accent-sky transition duration-300">FAQ</a>
+            <a href="#contact" class="block text-primary-navy hover:text-accent-sky transition duration-300">Contact</a>
+        </div>
+    </nav>
+
+    <section id="hero" class="relative min-h-screen flex items-center justify-center text-center text-white overflow-hidden bg-gradient-to-br from-primary-navy via-accent-sky to-accent-amber bg-[length:400%_400%] animate-gradient-shift px-4 pt-24 md:pt-0">
+        <i class="fa-solid fa-file-excel floating-icon icon-1 text-green-500 w-12 h-12 md:w-16 md:h-16 flex items-center justify-center rounded-full p-1 bg-white/20 text-3xl md:text-4xl" aria-hidden="true"></i>
+        <i class="fa-solid fa-chart-bar floating-icon icon-2 text-accent-sky w-12 h-12 md:w-16 md:h-16 flex items-center justify-center rounded-full p-1 bg-white/20 text-3xl md:text-4xl" aria-hidden="true"></i>
+        <i class="fa-solid fa-handshake floating-icon icon-3 text-red-400 w-12 h-12 md:w-16 md:h-16 flex items-center justify-center rounded-full p-1 bg-white/20 text-3xl md:text-4xl" aria-hidden="true"></i>
+        <i class="fa-solid fa-bullhorn floating-icon icon-4 text-gray-300 w-12 h-12 md:w-16 md:h-16 flex items-center justify-center rounded-full p-1 bg-white/20 text-3xl md:text-4xl" aria-hidden="true"></i>
+        <i class="fa-solid fa-users floating-icon icon-5 text-purple-400 w-12 h-12 md:w-16 md:h-16 flex items-center justify-center rounded-full p-1 bg-white/20 text-3xl md:text-4xl" aria-hidden="true"></i>
+        <i class="fa-solid fa-money-bill-wave floating-icon icon-6 text-orange-400 w-12 h-12 md:w-16 md:h-16 flex items-center justify-center rounded-full p-1 bg-white/20 text-3xl md:text-4xl" aria-hidden="true"></i>
+
+        <div class="relative z-10 space-y-6">
+<div class="h-8 md:h-16"></div>
+            <h1 class="text-5xl md:text-7xl font-extrabold leading-tight text-white animate-fade-in-up">
+                Shape Your Kid's Future with <br class="hidden md:block">
+                <span class="text-hollow-black-stroke">Sync</span><span class="text-hollow-amber-stroke">novate</span>
+            </h1>
+<div class="h-4 md:h-8"></div>
+<p class="text-lg md:text-2xl mt-4 max-w-2xl mx-auto text-white animate-fade-in-up" style="animation-delay: 0.3s;">
+                Unlock Your Potential with Personalized 5-Student Batch Training and Expert Guidance.
+            </p>
+            <div class="flex flex-col md:flex-row justify-center space-y-4 md:space-y-0 md:space-x-6 mt-8 animate-fade-in-up" style="animation-delay: 0.6s;">
+                <a href="#courses" class="bg-accent-sky hover:bg-sky-600 text-white font-bold py-3 px-8 rounded-xl shadow-lg transition duration-300 transform hover:scale-105">
+                    Explore Courses
+                </a>
+                <a href="#contact" class="bg-accent-amber hover:bg-amber-600 text-primary-navy font-bold py-3 px-8 rounded-xl shadow-lg transition duration-300 transform hover:scale-105">
+                    Book Free Counselling
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <section id="about" class="container mx-auto py-20 px-4 md:px-8 text-center">
+        <h2 class="text-4xl font-bold mb-12 text-primary-navy reveal-item">About Syncnovate</h2>
+        <div class="flex flex-col md:flex-row items-center justify-center gap-12">
+            <div class="md:w-1/2 text-left space-y-6 reveal-left">
+                <p class="text-lg text-gray-text leading-relaxed">
+                    Syncnovate was founded by a seasoned <strong class="text-accent-sky">post-graduate Data Analytics professor</strong> with a vision to bridge the gap between academic knowledge and industry demands. Our mission is to equip undergraduate and early-career students (ages 18–25) with practical, job-ready skills in critical business domains.
+                </p>
+                <p class="text-lg text-gray-text leading-relaxed">
+                    We believe in quality over quantity, which is why we limit our batch sizes to just <strong class="text-accent-amber">5 students</strong>. This ensures truly personalized attention, in-depth learning, and a supportive environment where every student's growth is prioritized.
+                </p>
+            </div>
+            <div class="md:w-1/2 grid grid-cols-1 sm:grid-cols-2 gap-8 text-center reveal-right">
+                <div class="bg-white p-6 rounded-2xl shadow-md hover:shadow-xl transition duration-300 transform hover:-translate-y-2">
+                    <i class="fa-solid fa-person-chalkboard text-accent-sky text-5xl mb-4" aria-hidden="true"></i>
+                    <h3 class="text-xl font-semibold text-primary-navy mb-2">1:1 Mentoring</h3>
+                    <p class="text-gray-text">Dedicated guidance for every student.</p>
+                </div>
+                <div class="bg-white p-6 rounded-2xl shadow-md hover:shadow-xl transition duration-300 transform hover:-translate-y-2">
+                    <i class="fa-solid fa-briefcase text-accent-sky text-5xl mb-4" aria-hidden="true"></i>
+                    <h3 class="text-xl font-semibold text-primary-navy mb-2">Corporate-Ready Courses</h3>
+                    <p class="text-gray-text">Skills directly applicable in the industry.</p>
+                </div>
+                <div class="bg-white p-6 rounded-2xl shadow-md hover:shadow-xl transition duration-300 transform hover:-translate-y-2">
+                    <i class="fa-solid fa-clock text-accent-sky text-5xl mb-4" aria-hidden="true"></i>
+                    <h3 class="text-xl font-semibold text-primary-navy mb-2">Flexible Hours</h3>
+                    <p class="text-gray-text">Learn at your own pace and convenience.</p>
+                </div>
+                <div class="bg-white p-6 rounded-2xl shadow-md hover:shadow-xl transition duration-300 transform hover:-translate-y-2">
+                    <i class="fa-solid fa-users-line text-accent-sky text-5xl mb-4" aria-hidden="true"></i>
+                    <h3 class="text-xl font-semibold text-primary-navy mb-2">Small Batch Size</h3>
+                    <p class="text-gray-text">Maximum 5 students per batch for focused learning.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="courses" class="bg-light-gray py-20 px-4 md:px-8 text-center">
+        <h2 class="text-4xl font-bold mb-12 text-primary-navy reveal-item">Our Courses</h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-6xl mx-auto">
+            <div class="course-card bg-white p-8 rounded-2xl shadow-lg hover:shadow-2xl transition duration-300 transform hover:scale-105 reveal-item">
+                <i class="fa-solid fa-file-excel text-green-500 text-6xl mb-6" aria-hidden="true"></i>
+                <h3 class="text-2xl font-semibold text-primary-navy mb-3">Excel Basics</h3>
+                <p class="text-gray-600 mb-6 line-clamp-2">Master spreadsheets, formulas, and data organization for efficient analysis.</p>
+                <button class="enroll-btn bg-accent-sky hover:bg-sky-600 text-white font-bold py-3 px-6 rounded-xl transition duration-300 transform hover:scale-105">
+                    Enroll Now
+                </button>
+            </div>
+            <div class="course-card bg-white p-8 rounded-2xl shadow-lg hover:shadow-2xl transition duration-300 transform hover:scale-105 reveal-item" style="animation-delay: 0.3s;">
+                <i class="fa-solid fa-bullhorn text-gray-400 text-6xl mb-6" aria-hidden="true"></i>
+                <h3 class="text-2xl font-semibold text-primary-navy mb-3">Digital Marketing Tools</h3>
+                <p class="text-gray-600 mb-6 line-clamp-2">Learn SEO, SEM, social media, and content marketing strategies.</p>
+                <button class="enroll-btn bg-accent-sky hover:bg-sky-600 text-white font-bold py-3 px-6 rounded-xl transition duration-300 transform hover:scale-105">
+                    Enroll Now
+                </button>
+            </div>
+            <div class="course-card bg-white p-8 rounded-2xl shadow-lg hover:shadow-2xl transition duration-300 transform hover:scale-105 reveal-item" style="animation-delay: 0.1s;">
+                <i class="fa-solid fa-chart-simple text-accent-sky text-6xl mb-6" aria-hidden="true"></i>
+                <h3 class="text-2xl font-semibold text-primary-navy mb-3">Power BI Essentials</h3>
+                <p class="text-gray-600 mb-6 line-clamp-2">Create interactive dashboards and compelling data visualizations.</p>
+                <button class="enroll-btn bg-accent-sky hover:bg-sky-600 text-white font-bold py-3 px-6 rounded-xl transition duration-300 transform hover:scale-105">
+                    Enroll Now
+                </button>
+            </div>
+            <div class="course-card bg-white p-8 rounded-2xl shadow-lg hover:shadow-2xl transition duration-300 transform hover:scale-105 reveal-item" style="animation-delay: 0.2s;">
+                <i class="fa-solid fa-handshake text-red-500 text-6xl mb-6" aria-hidden="true"></i>
+                <h3 class="text-2xl font-semibold text-primary-navy mb-3">Zoho/Salesforce CRMs</h3>
+                <p class="text-gray-600 mb-6 line-clamp-2">Understand customer relationship management and platform usage.</p>
+                <button class="enroll-btn bg-accent-sky hover:bg-sky-600 text-white font-bold py-3 px-6 rounded-xl transition duration-300 transform hover:scale-105">
+                    Enroll Now
+                </button>
+            </div>
+            <div class="course-card bg-white p-8 rounded-2xl shadow-lg hover:shadow-2xl transition duration-300 transform hover:scale-105 reveal-item" style="animation-delay: 0.4s;">
+                <i class="fa-solid fa-chart-pie text-purple-500 text-6xl mb-6" aria-hidden="true"></i>
+                <h3 class="text-2xl font-semibold text-primary-navy mb-3">Intro to Business Fundamentals</h3>
+                <p class="text-gray-600 mb-6 line-clamp-2">Gain foundational knowledge in HR, Marketing, Finance, and Business Analytics.</p>
+                <button class="enroll-btn bg-accent-sky hover:bg-sky-600 text-white font-bold py-3 px-6 rounded-xl transition duration-300 transform hover:scale-105">
+                    Enroll Now
+                </button>
+            </div>
+            <div class="course-card bg-white p-8 rounded-2xl shadow-lg hover:shadow-2xl transition duration-300 transform hover:scale-105 reveal-item" style="animation-delay: 0.5s;">
+                <i class="fa-solid fa-file-lines text-blue-500 text-6xl mb-6" aria-hidden="true"></i>
+                <h3 class="text-2xl font-semibold text-primary-navy mb-3">BRD/FRD & BA Documentations</h3>
+                <p class="text-gray-600 mb-6 line-clamp-2">Master business requirement documents, functional requirement documents, and business analysis techniques.</p>
+                <button class="enroll-btn bg-accent-sky hover:bg-sky-600 text-white font-bold py-3 px-6 rounded-xl transition duration-300 transform hover:scale-105">
+                    Enroll Now
+                </button>
+            </div>
+            <div class="course-card bg-white p-8 rounded-2xl shadow-lg hover:shadow-2xl transition duration-300 transform hover:scale-105 reveal-item" style="animation-delay: 0.6s;">
+                <i class="fa-solid fa-code text-cyan-500 text-6xl mb-6" aria-hidden="true"></i>
+                <h3 class="text-2xl font-semibold text-primary-navy mb-3">Basics of Python</h3>
+                <p class="text-gray-600 mb-6 line-clamp-2">Learn foundational Python programming for data manipulation and scripting.</p>
+                <button class="enroll-btn bg-accent-sky hover:bg-sky-600 text-white font-bold py-3 px-6 rounded-xl transition duration-300 transform hover:scale-105">
+                    Enroll Now
+                </button>
+            </div>
+            <div class="course-card bg-white p-8 rounded-2xl shadow-lg hover:shadow-2xl transition duration-300 transform hover:scale-105 reveal-item" style="animation-delay: 0.7s;">
+                <i class="fa-solid fa-robot text-orange-500 text-6xl mb-6" aria-hidden="true"></i>
+                <h3 class="text-2xl font-semibold text-primary-navy mb-3">AI Tools for Managers</h3>
+                <p class="text-gray-600 mb-6 line-clamp-2">Discover how to leverage AI tools to enhance business insights and operational efficiency.</p>
+                <button class="enroll-btn bg-accent-sky hover:bg-sky-600 text-white font-bold py-3 px-6 rounded-xl transition duration-300 transform hover:scale-105">
+                    Enroll Now
+                </button>
+            </div>
+            <div class="course-card bg-white p-8 rounded-2xl shadow-lg hover:shadow-2xl transition duration-300 transform hover:scale-105 reveal-item" style="animation-delay: 0.8s;">
+                <i class="fa-solid fa-tasks text-teal-500 text-6xl mb-6" aria-hidden="true"></i>
+                <h3 class="text-2xl font-semibold text-primary-navy mb-3">Project Management Tools</h3>
+                <p class="text-gray-600 mb-6 line-clamp-2">Learn to use tools like Jira, Trello, and Asana for effective project tracking and collaboration.</p>
+                <button class="enroll-btn bg-accent-sky hover:bg-sky-600 text-white font-bold py-3 px-6 rounded-xl transition duration-300 transform hover:scale-105">
+                    Enroll Now
+                </button>
+            </div>
+
+            <!-- NEWLY ADDED COURSE CARDS -->
+            <div class="course-card bg-white p-8 rounded-2xl shadow-lg hover:shadow-2xl transition duration-300 transform hover:scale-105 reveal-item" style="animation-delay: 0.9s;">
+                <i class="fa-solid fa-headset text-purple-400 text-6xl mb-6" aria-hidden="true"></i>
+                <h3 class="text-2xl font-semibold text-primary-navy mb-3">Customer Service Fundamentals</h3>
+                <p class="text-gray-600 mb-6 line-clamp-2">Develop essential skills for effective customer interaction and support.</p>
+                <button class="enroll-btn bg-accent-sky hover:bg-sky-600 text-white font-bold py-3 px-6 rounded-xl transition duration-300 transform hover:scale-105">
+                    Enroll Now
+                </button>
+            </div>
+            <div class="course-card bg-white p-8 rounded-2xl shadow-lg hover:shadow-2xl transition duration-300 transform hover:scale-105 reveal-item" style="animation-delay: 1.0s;">
+                <i class="fa-solid fa-calculator text-emerald-500 text-6xl mb-6" aria-hidden="true"></i>
+                <h3 class="text-2xl font-semibold text-primary-navy mb-3">Financial Accounting</h3>
+                <p class="text-gray-600 mb-6 line-clamp-2">Learn the principles of recording, summarizing, and reporting financial transactions.</p>
+                <button class="enroll-btn bg-accent-sky hover:bg-sky-600 text-white font-bold py-3 px-6 rounded-xl transition duration-300 transform hover:scale-105">
+                    Enroll Now
+                </button>
+            </div>
+            <div class="course-card bg-white p-8 rounded-2xl shadow-lg hover:shadow-2xl transition duration-300 transform hover:scale-105 reveal-item" style="animation-delay: 1.1s;">
+                <i class="fa-solid fa-comments text-red-400 text-6xl mb-6" aria-hidden="true"></i>
+                <h3 class="text-2xl font-semibold text-primary-navy mb-3">Business Communication</h3>
+                <p class="text-gray-600 mb-6 line-clamp-2">Enhance your verbal and written communication for professional environments.</p>
+                <button class="enroll-btn bg-accent-sky hover:bg-sky-600 text-white font-bold py-3 px-6 rounded-xl transition duration-300 transform hover:scale-105">
+                    Enroll Now
+                </button>
+            </div>
+            <!-- END OF NEWLY ADDED COURSE CARDS -->
+        </div>
+    </section>
+
+    <section id="why-syncnovate" class="container mx-auto py-20 px-4 md:px-8 text-center">
+        <h2 class="text-4xl font-bold mb-12 text-primary-navy reveal-item">Why Choose Syncnovate?</h2>
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 mb-16">
+            <div class="feature-item bg-white p-6 rounded-2xl shadow-md flex flex-col items-center justify-center text-center reveal-item">
+                <i class="fa-solid fa-users-line text-accent-sky text-5xl mb-4" aria-hidden="true"></i>
+                <h3 class="text-xl font-semibold text-primary-navy mb-2">Small Batch Size</h3>
+                <p class="text-gray-600">Max 5 students for personalized attention.</p>
+            </div>
+            <div class="feature-item bg-white p-6 rounded-2xl shadow-md flex flex-col items-center justify-center text-center reveal-item" style="animation-delay: 0.1s;">
+                <i class="fa-solid fa-laptop-code text-accent-sky text-5xl mb-4" aria-hidden="true"></i>
+                <h3 class="text-xl font-semibold text-primary-navy mb-2">Hands-on Projects</h3>
+                <p class="text-gray-600">Apply what you learn to real-world scenarios.</p>
+            </div>
+            <div class="feature-item bg-white p-6 rounded-2xl shadow-md flex flex-col items-center justify-center text-center reveal-item" style="animation-delay: 0.2s;">
+                <i class="fa-solid fa-dollar-sign text-accent-sky text-5xl mb-4" aria-hidden="true"></i>
+                <h3 class="text-xl font-semibold text-primary-navy mb-2">Low Hourly Cost</h3>
+                <p class="text-gray-600">Affordable training at $4–5 per hour.</p>
+            </div>
+            <div class="feature-item bg-white p-6 rounded-2xl shadow-md flex flex-col items-center justify-center text-center reveal-item" style="animation-delay: 0.3s;">
+                <i class="fa-solid fa-award text-accent-sky text-5xl mb-4" aria-hidden="true"></i>
+                <h3 class="text-xl font-semibold text-primary-navy mb-2">Corporate-Ready Skills</h3>
+                <p class="text-gray-600">Develop skills employers are looking for.</p>
+            </div>
+        </div>
+
+        <div class="flex flex-col md:flex-row justify-around items-center gap-10 mt-16">
+            <div class="text-center bg-accent-sky text-white p-8 rounded-2xl shadow-md min-w-[200px] reveal-item zoom-in" data-count-to="200" id="students-trained-container">
+                <p class="text-5xl font-bold" id="students-trained-counter">0</p>
+                <p class="text-xl mt-2">Students Trained</p>
+            </div>
+            <div class="text-center bg-accent-amber text-primary-navy p-8 rounded-2xl shadow-md min-w-[200px] reveal-item zoom-in" data-count-to="10" id="tools-taught-container">
+                <p class="text-5xl font-bold" id="tools-taught-counter">0</p>
+                <p class="text-xl mt-2">Tools Taught</p>
+            </div>
+        </div>
+    </section>
+
+    <section id="student-path-planner" class="bg-light-gray py-20 px-4 md:px-8 text-center">
+        <h2 class="text-4xl font-bold mb-12 text-primary-navy reveal-item">Your Learning Path</h2>
+        <p class="text-lg text-gray-text mb-12 max-w-3xl mx-auto reveal-item">
+            Not sure where to start? Our planner helps you identify the best domain for your career aspirations.
+        </p>
+
+        <div class="flex flex-col items-center justify-center space-y-8 md:space-y-0 md:flex-row md:space-x-12 max-w-6xl mx-auto">
+            <div class="path-box p-6 bg-white rounded-2xl shadow-lg reveal-left cursor-pointer group relative w-full md:w-auto">
+                <h3 class="text-xl font-semibold text-primary-navy mb-2">Start with Basics</h3>
+                <p class="text-gray-text text-sm">Foundational for all data roles.</p>
+                <div class="absolute inset-0 flex items-center justify-center bg-primary-navy bg-opacity-90 text-white opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-2xl p-4 text-sm md:text-base text-center">
+                    Master essential data manipulation and analysis for any business role.
+                </div>
+            </div>
+
+            <div class="hidden md:flex items-center justify-center text-primary-navy font-semibold text-2xl">
+                <svg class="w-8 h-8 text-accent-sky" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"></path>
+                </svg>
+            </div>
+
+            <div class="path-box p-6 bg-white rounded-2xl shadow-lg reveal-item cursor-pointer group relative w-full md:w-auto" style="animation-delay: 0.1s;">
+                <h3 class="text-xl font-semibold text-primary-navy mb-2">Solve Real-life problems</h3>
+                <p class="text-gray-text text-sm">Visualize your data effectively.</p>
+                <div class="absolute inset-0 flex items-center justify-center bg-primary-navy bg-opacity-90 text-white opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-2xl p-4 text-sm md:text-base text-center">
+                    Learn to create interactive dashboards and compelling data visualizations.
+                </div>
+            </div>
+
+            <div class="hidden md:flex items-center justify-center text-primary-navy font-semibold text-2xl">
+                <svg class="w-8 h-8 text-accent-sky" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"></path>
+                </svg>
+            </div>
+
+            <div class="path-box p-6 bg-white rounded-2xl shadow-lg reveal-right cursor-pointer group relative w-full md:w-auto" style="animation-delay: 0.2s;">
+                <h3 class="text-xl font-semibold text-primary-navy mb-2">Specialize in Domains</h3>
+                <p class="text-gray-text text-sm">Choose your career focus.</p>
+                <div class="absolute inset-0 flex items-center justify-center bg-primary-navy bg-opacity-90 text-white opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-2xl p-4 text-sm md:text-base text-center">
+                    Tailor your skills for specific industry roles like CRM, Digital Marketing, HR, Finance, or Business Analytics.
+                </div>
+            </div>
+        </div>
+        <p class="text-md text-gray-text mt-8 reveal-item">
+           
+        </p>
+    </section>
+
+    <section id="testimonials" class="py-20 px-4 md:px-8 bg-primary-navy text-white text-center">
+        <h2 class="text-4xl font-bold mb-12 text-white reveal-item">What Our Students Say</h2>
+        <div class="swiper mySwiper max-w-3xl mx-auto">
+            <div class="swiper-wrapper">
+                <div class="swiper-slide bg-white text-primary-navy p-8 rounded-2xl shadow-lg flex flex-col items-center justify-center reveal-item">
+                    <img src="https://placehold.co/80x80/0ea5e9/ffffff?text=JP" alt="Student Jane P." class="w-20 h-20 rounded-full mb-4 object-cover border-4 border-accent-sky">
+                    <p class="text-lg font-medium mb-4 italic">"Syncnovate transformed my understanding of data. The small batch size meant I got personal attention and my doubts were cleared instantly!"</p>
+                    <p class="font-semibold text-accent-sky">- Jane P., Business Analyst Intern</p>
+                </div>
+                <div class="swiper-slide bg-white text-primary-navy p-8 rounded-2xl shadow-lg flex flex-col items-center justify-center reveal-item">
+                    <img src="https://placehold.co/80x80/facc15/0f172a?text=AD" alt="Student Alex D." class="w-20 h-20 rounded-full mb-4 object-cover border-4 border-accent-amber">
+                    <p class="text-lg font-medium mb-4 italic">"The Power BI course was incredibly practical. I immediately applied what I learned to my projects. Highly recommend Syncnovate for job-ready skills."</p>
+                    <p class="font-semibold text-accent-amber">- Alex D., Marketing Executive</p>
+                </div>
+                <div class="swiper-slide bg-white text-primary-navy p-8 rounded-2xl shadow-lg flex flex-col items-center justify-center reveal-item">
+                    <img src="https://placehold.co/80x80/34d399/ffffff?text=SK" alt="Student Sarah K." class="w-20 h-20 rounded-full mb-4 object-cover border-4 border-green-500">
+                    <p class="text-lg font-medium mb-4 italic">"The CRM training was spot on! Now I feel confident using Salesforce in my new role. Thank you, Syncnovate, for the excellent training."</p>
+                    <p class="font-semibold text-green-500">- Sarah K., Sales Coordinator</p>
+                </div>
+            </div>
+            <div class="swiper-pagination"></div>
+
+            <div class="swiper-button-prev text-white"></div>
+            <div class="swiper-button-next text-white"></div>
+        </div>
+    </section>
+
+    <section id="faq" class="container mx-auto py-20 px-4 md:px-8">
+        <h2 class="text-4xl font-bold mb-12 text-primary-navy text-center reveal-item">Frequently Asked Questions</h2>
+        <div class="max-w-3xl mx-auto space-y-4">
+            <div class="faq-card bg-white rounded-2xl reveal-item">
+                <button class="accordion-header flex justify-between items-center w-full text-xl font-semibold text-primary-navy transition-colors duration-300 focus:outline-none" aria-expanded="false">
+                    <span>What is the batch size for training?</span>
+                    <div class="w-6 h-6 flex items-center justify-center">
+                        <i class="fa-solid fa-plus text-primary-navy"></i>
+                        <i class="fa-solid fa-minus text-accent-sky hidden"></i>
+                    </div>
+                </button>
+                <div class="accordion-content px-6 pb-6 text-gray-text hidden-display">
+                    <p>We believe in personalized attention, so each training batch is limited to a maximum of 5 students.</p>
+                </div>
+            </div>
+            <div class="faq-card bg-white rounded-2xl reveal-item" style="animation-delay: 0.1s;">
+                <button class="accordion-header flex justify-between items-center w-full text-xl font-semibold text-primary-navy transition-colors duration-300 focus:outline-none" aria-expanded="false">
+                    <span>Are the courses suitable for beginners?</span>
+                    <div class="w-6 h-6 flex items-center justify-center">
+                        <i class="fa-solid fa-plus text-primary-navy"></i>
+                        <i class="fa-solid fa-minus text-accent-sky hidden"></i>
+                    </div>
+                </button>
+                <div class="accordion-content px-6 pb-6 text-gray-text hidden-display">
+                    <p>Yes, our courses are designed for undergraduate and early-career students (ages 18-25), covering fundamentals and building up to advanced topics.</p>
+                </div>
+            </div>
+            <div class="faq-card bg-white rounded-2xl reveal-item" style="animation-delay: 0.2s;">
+                <button class="accordion-header flex justify-between items-center w-full text-xl font-semibold text-primary-navy transition-colors duration-300 focus:outline-none" aria-expanded="false">
+                    <span>Do you offer placement assistance?</span>
+                    <div class="w-6 h-6 flex items-center justify-center">
+                        <i class="fa-solid fa-plus text-primary-navy"></i>
+                        <i class="fa-solid fa-minus text-accent-sky hidden"></i>
+                    </div>
+                </button>
+                <div class="accordion-content px-6 pb-6 text-gray-text hidden-display">
+                    <p>While we don't guarantee placements, our courses are designed to make you corporate-ready, and we provide guidance on resume building and interview preparation.</p>
+                </div>
+            </div>
+            <div class="faq-card bg-white rounded-2xl reveal-item" style="animation-delay: 0.3s;">
+                <button class="accordion-header flex justify-between items-center w-full text-xl font-semibold text-primary-navy transition-colors duration-300 focus:outline-none" aria-expanded="false">
+                    <span>What is the duration of each course?</span>
+                    <div class="w-6 h-6 flex items-center justify-center">
+                        <i class="fa-solid fa-plus text-primary-navy"></i>
+                        <i class="fa-solid fa-minus text-accent-sky hidden"></i>
+                    </div>
+                </button>
+                <div class="accordion-content px-6 pb-6 text-gray-text hidden-display">
+                    <p>Course durations vary based on the topic and depth. Please refer to our course details for specific information or contact us for more details.</p>
+                </div>
+            </div>
+            <div class="faq-card bg-white rounded-2xl reveal-item" style="animation-delay: 0.4s;">
+                <button class="accordion-header flex justify-between items-center w-full text-xl font-semibold text-primary-navy transition-colors duration-300 focus:outline-none" aria-expanded="false">
+                    <span>How can I book a free counselling session?</span>
+                    <div class="w-6 h-6 flex items-center justify-center">
+                        <i class="fa-solid fa-plus text-primary-navy"></i>
+                        <i class="fa-solid fa-minus text-accent-sky hidden"></i>
+                    </div>
+                </button>
+                <div class="accordion-content px-6 pb-6 text-gray-text hidden-display">
+                    <p>You can book a free counselling session by filling out the contact form at the bottom of this page or by clicking the "Book Free Counselling" button in the Hero section.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <div id="sticky-enroll-bar" class="fixed bottom-0 left-0 w-full bg-accent-sky text-white p-4 flex justify-center items-center shadow-lg transition-transform duration-500 transform translate-y-full z-40">
+        <button class="bg-accent-amber hover:bg-amber-600 text-primary-navy font-bold py-3 px-8 rounded-xl shadow-lg transition duration-300 transform hover:scale-105">
+            Enroll Now & Shape Your Future!
+        </button>
+    </div>
+
+    <footer id="contact" class="bg-primary-navy text-white py-16 px-4 md:px-8">
+        <div class="container mx-auto grid grid-cols-1 md:grid-cols-3 gap-12">
+            <div class="space-y-4">
+                <h3 class="text-2xl font-bold mb-4">
+                    <span class="text-primary-gray-200">Sync</span><span class="text-accent-sky">novate</span>
+                </h3>
+                <p class="text-gray-400">Empowering the next generation with practical skills for a successful career in data and business.</p>
+                <div class="flex space-x-4 mt-4">
+                    <a href="https://linkedin.com" target="_blank" aria-label="LinkedIn" class="text-gray-300 hover:text-accent-sky transition duration-300">
+                        <i class="fab fa-linkedin text-3xl" aria-hidden="true"></i>
+                    </a>
+                    <a href="https://youtube.com" target="_blank" aria-label="YouTube" class="text-gray-300 hover:text-accent-sky transition duration-300">
+                        <i class="fab fa-youtube text-3xl" aria-hidden="true"></i>
+                    </a>
+                    </div>
+            </div>
+
+            <div>
+                <h3 class="text-2xl font-bold mb-4">Quick Links</h3>
+                <ul class="space-y-2">
+                    <li><a href="#about" class="text-gray-400 hover:text-accent-sky transition duration-300">About Us</a></li>
+                    <li><a href="#courses" class="text-gray-400 hover:text-accent-sky transition duration-300">Courses</a></li>
+                    <li><a href="#why-syncnovate" class="text-gray-400 hover:text-accent-sky transition duration-300">Why Syncnovate?</a></li>
+                    <li><a href="#testimonials" class="text-gray-400 hover:text-accent-sky transition duration-300">Testimonials</a></li>
+                    <li><a href="#faq" class="text-gray-400 hover:text-accent-sky transition duration-300">FAQ</a></li>
+                </ul>
+            </div>
+
+            <div>
+                <h3 class="text-2xl font-bold mb-4">Contact Us</h3>
+                <form id="contact-form" class="space-y-4">
+                    <div>
+                        <input type="text" id="name" name="name" placeholder="Your Name" class="w-full p-3 rounded-lg bg-gray-800 border border-gray-700 text-white focus:outline-none focus:border-accent-sky" required aria-label="Your Name">
+                        <p id="name-error" class="text-red-400 text-sm mt-1 hidden">Please enter your name.</p>
+                    </div>
+                    <div>
+                        <input type="email" id="email" name="email" placeholder="Your Email" class="w-full p-3 rounded-lg bg-gray-800 border border-gray-700 text-white focus:outline-none focus:border-accent-sky" required aria-label="Your Email">
+                        <p id="email-error" class="text-red-400 text-sm mt-1 hidden">Please enter a valid email address.</p>
+                    </div>
+                    <div>
+                        <textarea id="message" name="message" rows="4" placeholder="Your Message" class="w-full p-3 rounded-lg bg-gray-800 border border-gray-700 text-white focus:outline-none focus:border-accent-sky" required aria-label="Your Message"></textarea>
+                        <p id="message-error" class="text-red-400 text-sm mt-1 hidden">Please enter your message.</p>
+                    </div>
+                    <button type="submit" class="bg-accent-sky hover:bg-sky-600 text-white font-bold py-3 px-6 rounded-xl transition duration-300 transform hover:scale-105">
+                        Send Message
+                    </button>
+                    <p id="form-success" class="text-green-400 mt-2 hidden">Your message has been sent successfully!</p>
+                </form>
+            </div>
+        </div>
+        <div class="text-center mt-12 text-gray-500 text-sm">
+            © <span id="current-year"></span> Syncnovate. All rights reserved.
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // --- Navbar Functionality ---
+            const navbar = document.getElementById('navbar');
+            const mobileMenuButton = document.getElementById('mobile-menu-button');
+            const mobileMenu = document.getElementById('mobile-menu');
+            let lastScrollY = window.scrollY;
+            const scrollThreshold = 100; // Distance to scroll before navbar behavior changes
+
+            // Show navbar on load for desktop, animate in on scroll for mobile
+            if (window.innerWidth >= 768) { // md breakpoint
+                navbar.classList.remove('-translate-y-full');
+            }
+
+            window.addEventListener('scroll', () => {
+                // For desktop, navbar is always visible. For mobile, animate.
+                if (window.innerWidth < 768) {
+                    if (window.scrollY > scrollThreshold) {
+                        if (window.scrollY < lastScrollY) { // Scrolling up
+                            navbar.classList.remove('-translate-y-full');
+                        } else { // Scrolling down
+                            navbar.classList.add('-translate-y-full');
+                        }
+                    } else {
+                        // At the very top, always show navbar
+                        navbar.classList.remove('-translate-y-full');
+                    }
+                }
+                lastScrollY = window.scrollY;
+            });
+
+            // Toggle mobile menu visibility
+            mobileMenuButton.addEventListener('click', () => {
+                mobileMenu.classList.toggle('scale-y-0');
+            });
+
+            // Close mobile menu when a link inside it is clicked
+            mobileMenu.querySelectorAll('a').forEach(link => {
+                link.addEventListener('click', () => {
+                    mobileMenu.classList.add('scale-y-0');
+                });
+            });
+
+            // --- Intersection Observer for Scroll Animations ---
+            const observerOptions = {
+                root: null, // viewport as the root
+                rootMargin: '0px',
+                threshold: 0.1 // Trigger when 10% of the element is visible
+            };
+
+            const observer = new IntersectionObserver((entries, observer) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('is-visible');
+                        observer.unobserve(entry.target); // Stop observing once animated
+                    }
+                });
+            }, observerOptions);
+
+            // Apply observer to all elements with reveal classes
+            document.querySelectorAll('.reveal-item, .reveal-left, .reveal-right, .zoom-in').forEach(el => {
+                observer.observe(el);
+            });
+
+            // --- Counter Animations for "Why Syncnovate?" section ---
+            const animateCounter = (id, target) => {
+                const element = document.getElementById(id);
+                let start = 0;
+                const duration = 2000; // 2 seconds for animation
+                const stepTime = 15; // Milliseconds per step
+
+                // Calculate increment per step
+                const increment = Math.ceil(target / (duration / stepTime));
+
+                const timer = setInterval(() => {
+                    start += increment;
+                    if (start >= target) {
+                        start = target;
+                        clearInterval(timer); // Stop the animation
+                    }
+                    element.textContent = start;
+                }, stepTime);
+            };
+
+            // Observer for counter animations
+            const counterObserver = new IntersectionObserver((entries, observer) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        // Get target count from data-count-to attribute
+                        const targetCount = parseInt(entry.target.dataset.countTo);
+                        // Get the actual counter element ID (child of the observed container)
+                        const counterId = entry.target.querySelector('p[id$="-counter"]').id;
+                        animateCounter(counterId, targetCount);
+                        observer.unobserve(entry.target); // Stop observing once animated
+                    }
+                });
+            }, { threshold: 0.5 }); // Trigger when 50% of the element is visible
+
+            // Apply observer to counter containers
+            document.querySelectorAll('[data-count-to]').forEach(counterContainer => {
+                counterObserver.observe(counterContainer);
+            });
+
+            // --- Accordion Functionality for FAQ ---
+            const accordionHeaders = document.querySelectorAll('.accordion-header');
+            accordionHeaders.forEach(header => {
+                const content = header.nextElementSibling; // The content div
+                // Initially hide content using display: none
+                content.classList.add('hidden-display');
+                content.style.maxHeight = '0px'; // Ensure max-height is 0 initially
+
+                header.addEventListener('click', () => {
+                    const plusIcon = header.querySelector('.fa-plus'); // The plus icon
+                    const minusIcon = header.querySelector('.fa-minus'); // The minus icon
+
+                    // Close all other open accordions
+                    accordionHeaders.forEach(otherHeader => {
+                        if (otherHeader !== header && otherHeader.classList.contains('active')) {
+                            const otherContent = otherHeader.nextElementSibling;
+                            const otherPlusIcon = otherHeader.querySelector('.fa-plus');
+                            const otherMinusIcon = otherHeader.querySelector('.fa-minus');
+
+                            otherHeader.classList.remove('active');
+                            otherHeader.classList.add('text-primary-navy');
+                            otherContent.style.maxHeight = '0px'; // Collapse other content
+                            // After transition, hide display
+                            otherContent.addEventListener('transitionend', function handler() {
+                                otherContent.classList.add('hidden-display');
+                                otherContent.removeEventListener('transitionend', handler);
+                            });
+                            otherPlusIcon.classList.remove('hidden');
+                            otherMinusIcon.classList.add('hidden');
+                            otherHeader.setAttribute('aria-expanded', 'false');
+                        }
+                    });
+
+                    // Toggle current accordion
+                    header.classList.toggle('active');
+
+                    if (header.classList.contains('active')) {
+                        // Expand
+                        content.classList.remove('hidden-display'); // Make display: block
+                        requestAnimationFrame(() => {
+                            content.style.maxHeight = content.scrollHeight + 'px'; // Animate to full height
+                        });
+
+                        header.setAttribute('aria-expanded', 'true');
+                        header.classList.add('text-accent-sky');
+                        header.classList.remove('text-primary-navy');
+                        plusIcon.classList.add('hidden');
+                        minusIcon.classList.remove('hidden');
+                    } else {
+                        // Collapse
+                        content.style.maxHeight = '0px'; // Animate to 0
+                        // After transition, hide display
+                        content.addEventListener('transitionend', function handler() {
+                            content.classList.add('hidden-display');
+                            content.removeEventListener('transitionend', handler);
+                        });
+                        header.setAttribute('aria-expanded', 'false');
+                        header.classList.remove('text-accent-sky');
+                        header.classList.add('text-primary-navy');
+                        plusIcon.classList.remove('hidden');
+                        minusIcon.classList.add('hidden');
+                    }
+                });
+            });
+
+            // --- Sticky Enroll Bar Functionality ---
+            const stickyEnrollBar = document.getElementById('sticky-enroll-bar');
+            const showBarThreshold = 0.3; // 30% of the page height scrolled
+
+            window.addEventListener('scroll', () => {
+                // Calculate scroll percentage
+                const scrollPercentage = (window.scrollY / (document.documentElement.scrollHeight - window.innerHeight));
+                if (scrollPercentage > showBarThreshold) {
+                    stickyEnrollBar.classList.remove('translate-y-full'); // Show bar
+                } else {
+                    stickyEnrollBar.classList.add('translate-y-full'); // Hide bar
+                }
+            });
+
+            // --- Swiper JS for Testimonials ---
+            const swiper = new Swiper('.mySwiper', {
+                slidesPerView: 1,
+                spaceBetween: 30,
+                loop: true, // Enable continuous loop mode
+                autoplay: {
+                    delay: 5000, // 5 seconds delay
+                    disableOnInteraction: false, // Continue autoplay after user interaction
+                },
+                pagination: {
+                    el: '.swiper-pagination', // Pagination dots
+                    clickable: true, // Make dots clickable
+                },
+                navigation: {
+                    nextEl: '.swiper-button-next', // Next button
+                    prevEl: '.swiper-button-prev', // Previous button
+                },
+            });
+
+            // --- Contact Form Validation ---
+            const contactForm = document.getElementById('contact-form');
+            const nameInput = document.getElementById('name');
+            const emailInput = document.getElementById('email');
+            const messageInput = document.getElementById('message');
+            const nameError = document.getElementById('name-error');
+            const emailError = document.getElementById('email-error');
+            const messageError = document.getElementById('message-error');
+            const formSuccess = document.getElementById('form-success');
+
+            contactForm.addEventListener('submit', function(event) {
+                event.preventDefault(); // Prevent default form submission
+
+                let isValid = true; // Flag to track overall form validity
+
+                // Validate Name field
+                if (nameInput.value.trim() === '') {
+                    nameError.classList.remove('hidden'); // Show error message
+                    isValid = false;
+                } else {
+                    nameError.classList.add('hidden'); // Hide error message
+                }
+
+                // Validate Email field using a simple regex pattern
+                const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                if (!emailPattern.test(emailInput.value.trim())) {
+                    emailError.classList.remove('hidden'); // Show error message
+                    isValid = false;
+                } else {
+                    emailError.classList.add('hidden'); // Hide error message
+                }
+
+                // Validate Message field
+                if (messageInput.value.trim() === '') {
+                    messageError.classList.remove('hidden'); // Show error message
+                    isValid = false;
+                } else {
+                    messageError.classList.add('hidden'); // Hide error message
+                }
+
+                if (isValid) {
+                    // If form is valid, simulate submission
+                    console.log('Form submitted successfully:', {
+                        name: nameInput.value,
+                        email: emailInput.value,
+                        message: messageInput.value
+                    });
+                    formSuccess.classList.remove('hidden'); // Show success message
+                    contactForm.reset(); // Clear the form fields
+
+                    // Hide success message after 5 seconds
+                    setTimeout(() => {
+                        formSuccess.classList.add('hidden');
+                    }, 5000);
+                }
+            });
+
+            // --- Set Current Year in Footer ---
+            document.getElementById('current-year').textContent = new Date().getFullYear();
+        });
+    </script>
+</body>
+</html>
